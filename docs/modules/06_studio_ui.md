@@ -1,0 +1,119 @@
+# Bloc 6 — Studio UI
+
+SFB Studio is the local production interface for the pre-MVP pipeline. It is intentionally routine: it does not try to be a full 3D editor. It exposes the local orchestrator state and lets a user review, retry, approve, reject and inspect outputs without browsing raw folders by hand.
+
+## Scope
+
+Implemented in v2.6:
+
+- React/Vite/TypeScript Studio UI.
+- API-connected dashboard.
+- Review Queue page.
+- Assets page with approve/reject actions.
+- Jobs page with retry/cancel/approve/reject and log drawer.
+- Artifacts page.
+- Bakes page that scans `asset.sfb.json` packages and reports.
+- Training page that reads local `runs/*/run.json` and `model_registry.json`.
+- Workflows page.
+- Settings page.
+- FastAPI endpoints for summary, review queue, bakes, training runs, model registry, job logs and review actions.
+
+## Start
+
+```bash
+SFB_WORKSPACE=workspace sfb-api
+cd apps/sfb_studio
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173
+```
+
+The UI expects the local API at:
+
+```text
+http://127.0.0.1:8765
+```
+
+You can override it with:
+
+```bash
+VITE_SFB_API=http://127.0.0.1:8765 npm run dev
+```
+
+## Pages
+
+### Dashboard
+
+Shows workspace status, project count, assets, jobs, artifacts, bakes, trainings and ComfyUI status.
+
+### Review Queue
+
+Aggregates:
+
+- assets with `unreviewed` or `needs_review`;
+- jobs with `failed` or `needs_review`;
+- bakes with `unreviewed` or `needs_review`.
+
+### Assets
+
+Lists registered assets and exposes quick approve/reject actions.
+
+### Jobs
+
+Lists orchestrator jobs, can run queued jobs and inspect job logs.
+
+### Artifacts
+
+Lists registered artifacts with paths and hashes.
+
+### Bakes
+
+Scans registered artifacts and `workspace/exports/**/asset.sfb.json` packages. It displays metrics, warnings and paths.
+
+### Training
+
+Reads local training runs from `workspace/runs` and the model registry from `workspace/runs/model_registry.json`.
+
+### Workflows
+
+Lists registered local, ComfyUI, Blender or SFB workflows.
+
+### Settings
+
+Displays API, workspace, ComfyUI and project configuration.
+
+## API endpoints added in v2.6
+
+```text
+GET   /api/summary
+GET   /api/review-queue
+PATCH /api/assets/{project_id}/{asset_id}/review
+PATCH /api/jobs/{job_id}/status
+POST  /api/jobs/{job_id}/cancel
+POST  /api/jobs/{job_id}/approve
+POST  /api/jobs/{job_id}/reject
+GET   /api/jobs/{job_id}/logs
+GET   /api/jobs/{job_id}/logs/{filename}
+POST  /api/jobs/run-all
+GET   /api/artifacts/{artifact_id}
+GET   /api/bakes
+GET   /api/training/runs
+GET   /api/training/model-registry
+GET   /api/settings
+GET   /api/file?path=...
+```
+
+## Non-goals for this block
+
+- No full 3D editor.
+- No splat viewer yet.
+- No scene graph editor yet.
+- No material editor.
+- No replacement for ComfyUI or Unity.
+
+The point of Bloc 6 is operational visibility and review, not advanced asset editing.

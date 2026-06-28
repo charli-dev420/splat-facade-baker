@@ -1,0 +1,4 @@
+sfb_clean_render, orthographic object render, centered single asset, solid neutral background, neutral soft lighting, no cast shadow, clean silhouette, ruined stone wall
+sfb_clean_render, orthographic object render, centered single asset, solid neutral background, neutral soft lighting, no bloom, no particles, medieval wooden crate
+sfb_clean_render, orthographic object render, centered single asset, solid neutral background, neutral soft lighting, clean silhouette, broken archway segment
+sfb_clean_render, orthographic object render, centered single asset, solid neutral background, neutral soft lighting, trellis friendly image, modular stone platform piece

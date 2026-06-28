@@ -1,0 +1,18 @@
+name: Python CI
+on: [push, pull_request]
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -U pip
+      - run: pip install -e packages/sfb_core[dev] -e packages/sfb_dataset -e packages/sfb_orchestrator[dev] -e packages/sfb_training[dev] -e packages/sfb_scene[dev]
+      - run: pytest packages/sfb_core/tests packages/sfb_dataset/tests packages/sfb_orchestrator/tests packages/sfb_training/tests packages/sfb_scene/tests
+      - run: python tools/make_synthetic_maps.py --out examples/synthetic
+      - run: sfb bake-maps --albedo examples/synthetic/albedo.png --alpha examples/synthetic/alpha.png --depth examples/synthetic/depth.png --name CIWall --width-m 8 --height-m 4 --max-depth-m 0.45 --view-contract examples/view_contracts/MV8_OBJECT.json --view-id front --out exports/CIWall
+      - run: python tools/validate_sfb_package.py exports/CIWall/asset.sfb.json
+      - run: sfb-dataset validate-contract examples/view_contracts/MV8_OBJECT.json
+      - run: sfb-scene validate examples/scenes/demo_lane.sfbscene.json

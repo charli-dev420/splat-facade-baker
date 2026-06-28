@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfb-dataset"
+version = "0.2.1"
+description = "Dataset Factory and ViewContract tools for Splat Facade Baker"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2"]
+
+[project.scripts]
+sfb-dataset = "sfb_dataset.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/view_pair_record.schema.json",
+  "title": "SFB View Pair Record",
+  "type": "object",
+  "required": ["schema", "pair_id", "asset_id", "split", "source_image", "target_image", "source_view_id", "target_view_id", "caption_text"],
+  "properties": {
+    "schema": { "const": "sfb.view_pair_record.v1" },
+    "export_id": { "type": "string" },
+    "pair_id": { "type": "string" },
+    "asset_id": { "type": "string" },
+    "split": { "enum": ["train", "val", "test", "holdout"] },
+    "source_image": { "type": "string" },
+    "target_image": { "type": "string" },
+    "source_view_id": { "type": "string" },
+    "target_view_id": { "type": "string" },
+    "target_azimuth_deg": { "type": ["number", "null"] },
+    "target_elevation_deg": { "type": ["number", "null"] },
+    "caption_text": { "type": "string" },
+    "negative_prompt": { "type": "string" }
+  }
+}

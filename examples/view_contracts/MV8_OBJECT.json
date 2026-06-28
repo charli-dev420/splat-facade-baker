@@ -1,0 +1,98 @@
+{
+  "schema": "sfb.view_contract.v1",
+  "view_contract_id": "MV8_OBJECT",
+  "camera_type": "orthographic",
+  "unit": "meters",
+  "object_centering": "bbox_center",
+  "scale_policy": "fit_80_percent_height",
+  "views": [
+    {
+      "view_id": "front",
+      "azimuth_deg": 0,
+      "elevation_deg": 10,
+      "role": "primary_facade",
+      "preferred_camera_band": [
+        -22.5,
+        22.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "front_right",
+      "azimuth_deg": 45,
+      "elevation_deg": 10,
+      "role": "secondary_facade",
+      "preferred_camera_band": [
+        22.5,
+        67.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "right",
+      "azimuth_deg": 90,
+      "elevation_deg": 10,
+      "role": "side_facade",
+      "preferred_camera_band": [
+        67.5,
+        112.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "back_right",
+      "azimuth_deg": 135,
+      "elevation_deg": 10,
+      "role": "secondary_back",
+      "preferred_camera_band": [
+        112.5,
+        157.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "back",
+      "azimuth_deg": 180,
+      "elevation_deg": 10,
+      "role": "back",
+      "preferred_camera_band": [
+        157.5,
+        202.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "back_left",
+      "azimuth_deg": 225,
+      "elevation_deg": 10,
+      "role": "secondary_back",
+      "preferred_camera_band": [
+        202.5,
+        247.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "left",
+      "azimuth_deg": 270,
+      "elevation_deg": 10,
+      "role": "side_facade",
+      "preferred_camera_band": [
+        247.5,
+        292.5
+      ],
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "front_left",
+      "azimuth_deg": 315,
+      "elevation_deg": 10,
+      "role": "secondary_facade",
+      "preferred_camera_band": [
+        292.5,
+        337.5
+      ],
+      "bake_mode": "depth_card"
+    }
+  ]
+}

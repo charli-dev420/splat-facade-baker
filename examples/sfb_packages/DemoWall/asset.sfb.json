@@ -1,0 +1,53 @@
+{
+  "schema": "sfb.asset.v1",
+  "asset_id": "DemoWall",
+  "source_asset_id": "DemoWall",
+  "source": "maps",
+  "view_contract": "MV8_OBJECT",
+  "view_id": "front",
+  "mode": "depth_card",
+  "units": "meters",
+  "width_m": 8.0,
+  "height_m": 4.0,
+  "max_depth_m": 0.45,
+  "pivot": "bottom_center",
+  "camera": {
+    "type": "orthographic",
+    "azimuth_deg": 0.0,
+    "elevation_deg": 10.0
+  },
+  "mesh": {
+    "triangles_lod0": 2062,
+    "vertices_lod0": 1112,
+    "lod0": "mesh/DemoWall_LOD0.glb",
+    "lod0_sfbmesh": "mesh/DemoWall_LOD0.sfbmesh.json",
+    "lod0_obj_debug": "mesh/DemoWall_LOD0.obj",
+    "lod1": "mesh/DemoWall_LOD1.glb",
+    "lod1_sfbmesh": "mesh/DemoWall_LOD1.sfbmesh.json",
+    "lod1_obj_debug": "mesh/DemoWall_LOD1.obj",
+    "triangles_lod1": 512,
+    "vertices_lod1": 297,
+    "lod2": "mesh/DemoWall_LOD2.glb",
+    "lod2_sfbmesh": "mesh/DemoWall_LOD2.sfbmesh.json",
+    "lod2_obj_debug": "mesh/DemoWall_LOD2.obj",
+    "triangles_lod2": 2,
+    "vertices_lod2": 4
+  },
+  "textures": {
+    "albedo": "textures/DemoWall_Albedo.png",
+    "alpha": "textures/DemoWall_Alpha.png",
+    "depth": "textures/DemoWall_Depth.png",
+    "normal": "textures/DemoWall_Normal.png",
+    "mask": "textures/DemoWall_Mask.png"
+  },
+  "collision": "collision/collider_proxy.json",
+  "runtime": {
+    "target": "mobile",
+    "mobile_tier": "mobile_mid",
+    "alpha_mode": "cutout",
+    "recommended_material": "SFB_Mobile_DepthCard",
+    "lod_count": 3
+  },
+  "preview": "preview/DemoWall_preview.png",
+  "report": "reports/DemoWall_report.json"
+}

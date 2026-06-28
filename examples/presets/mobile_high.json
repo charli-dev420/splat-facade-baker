@@ -1,0 +1,7 @@
+{
+  "texture_size": 2048,
+  "triangles_lod0": 1500,
+  "max_depth_m": 0.7,
+  "normal_map": true,
+  "alpha_mode": "cutout_or_blend_limited"
+}

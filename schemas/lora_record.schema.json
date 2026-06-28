@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/lora_record.schema.json",
+  "title": "SFB LoRA Record",
+  "type": "object",
+  "required": ["schema", "asset_id", "view_id", "split", "image", "caption_text"],
+  "properties": {
+    "schema": { "const": "sfb.lora_record.v1" },
+    "export_id": { "type": "string" },
+    "asset_id": { "type": "string" },
+    "view_id": { "type": "string" },
+    "split": { "enum": ["train", "val", "test", "holdout"] },
+    "data_tier": { "type": "string" },
+    "quality_status": { "type": "string" },
+    "category": { "type": "string" },
+    "style_family": { "type": "string" },
+    "image": { "type": "string" },
+    "caption": { "type": "string" },
+    "caption_text": { "type": "string" },
+    "negative_prompt": { "type": "string" },
+    "source_rgb": { "type": "string" },
+    "view_contract": { "type": ["string", "null"] },
+    "azimuth_deg": { "type": ["number", "null"] },
+    "elevation_deg": { "type": ["number", "null"] }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/dataset_manifest.schema.json",
+  "title": "SFB Dataset Manifest",
+  "type": "object",
+  "required": ["schema", "dataset_id", "assets"],
+  "properties": {
+    "schema": { "const": "sfb.dataset_manifest.v1" },
+    "dataset_id": { "type": "string" },
+    "view_contract": { "type": ["string", "null"] },
+    "description": { "type": "string" },
+    "frozen": { "type": "boolean" },
+    "metadata": { "type": "object" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "data_tier", "quality_status", "views"],
+        "properties": {
+          "asset_id": { "type": "string" },
+          "source_path": { "type": ["string", "null"] },
+          "source_hash": { "type": ["string", "null"] },
+          "source_ext": { "type": ["string", "null"] },
+          "source_license": { "type": "string" },
+          "data_tier": {
+            "enum": ["gold", "silver", "bronze", "rejected", "candidate", "gold_candidate"]
+          },
+          "quality_status": {
+            "enum": ["unreviewed", "needs_review", "approved", "rejected", "flagged"]
+          },
+          "category": { "type": "string" },
+          "style_family": { "type": "string" },
+          "base_caption": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "quality_score": { "type": ["number", "null"] },
+          "split": { "enum": ["train", "val", "test", "holdout", null] },
+          "width_m": { "type": ["number", "null"] },
+          "height_m": { "type": ["number", "null"] },
+          "depth_m": { "type": ["number", "null"] },
+          "notes": { "type": "string" },
+          "views": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["view_id"],
+              "properties": {
+                "view_id": { "type": "string" },
+                "rgb": { "type": ["string", "null"] },
+                "alpha": { "type": ["string", "null"] },
+                "depth": { "type": ["string", "null"] },
+                "normal": { "type": ["string", "null"] },
+                "camera": { "type": ["string", "null"] },
+                "preview": { "type": ["string", "null"] },
+                "azimuth_deg": { "type": ["number", "null"] },
+                "elevation_deg": { "type": ["number", "null"] },
+                "camera_type": { "type": ["string", "null"] },
+                "status": {
+                  "enum": ["unreviewed", "needs_review", "approved", "rejected", "flagged"]
+                },
+                "quality_score": { "type": ["number", "null"] },
+                "notes": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

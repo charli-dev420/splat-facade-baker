@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfb-training"
+version = "0.5.0"
+description = "Training prep, dataset export, and run registry tools for SFB"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2", "PyYAML>=6", "numpy>=1.23", "pillow>=10"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+sfb-trainprep = "sfb_training.cli:main"
+sfb-training = "sfb_training.cli:main"
+sfb-train = "sfb_training.train_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

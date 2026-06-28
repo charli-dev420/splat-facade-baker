@@ -1,0 +1,23 @@
+run_id: sfb_clean_render_lora_v0
+task: lora_clean_render
+backend: diffusers
+base_model: sdxl-base
+dataset: training_exports/lora_clean_render_v0
+output_dir: runs/sfb_clean_render_lora_v0
+training:
+  resolution: 1024
+  train_batch_size: 1
+  gradient_accumulation_steps: 4
+  learning_rate: 0.0001
+  max_train_steps: 6000
+  rank: 16
+  mixed_precision: fp16
+  seed: 1337
+data:
+  tiers:
+    gold: 1.0
+    silver: 0.35
+    bronze: 0.0
+validation:
+  every_steps: 500
+  fixed_seed: 42

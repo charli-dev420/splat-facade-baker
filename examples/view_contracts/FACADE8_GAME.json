@@ -1,0 +1,66 @@
+{
+  "schema": "sfb.view_contract.v1",
+  "view_contract_id": "FACADE8_GAME",
+  "camera_type": "orthographic",
+  "unit": "meters",
+  "object_centering": "bbox_center",
+  "scale_policy": "fit_80_percent_height",
+  "views": [
+    {
+      "view_id": "front_low",
+      "azimuth_deg": 0,
+      "elevation_deg": 8,
+      "role": "facade_low",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "front_mid",
+      "azimuth_deg": 0,
+      "elevation_deg": 30,
+      "role": "facade_mid",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "front_game",
+      "azimuth_deg": 0,
+      "elevation_deg": 50,
+      "role": "gameplay_view",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "left_45_low",
+      "azimuth_deg": 315,
+      "elevation_deg": 10,
+      "role": "left_transition_low",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "right_45_low",
+      "azimuth_deg": 45,
+      "elevation_deg": 10,
+      "role": "right_transition_low",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "left_45_game",
+      "azimuth_deg": 315,
+      "elevation_deg": 50,
+      "role": "left_transition_game",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "right_45_game",
+      "azimuth_deg": 45,
+      "elevation_deg": 50,
+      "role": "right_transition_game",
+      "bake_mode": "depth_card"
+    },
+    {
+      "view_id": "top_game",
+      "azimuth_deg": 0,
+      "elevation_deg": 65,
+      "role": "top_gameplay",
+      "bake_mode": "flat_card"
+    }
+  ]
+}

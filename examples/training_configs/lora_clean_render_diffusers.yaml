@@ -1,0 +1,36 @@
+schema: sfb.training_config.v1
+task: lora_clean_render
+backend: diffusers
+run:
+  run_id: clean_render_lora_v0
+  seed: 1337
+dataset:
+  path: training_exports/lora_clean_render_v0
+  export_id: lora_clean_render_v0
+  train_file: train.jsonl
+  val_file: val.jsonl
+  test_file: test.jsonl
+model:
+  base_model: stabilityai/stable-diffusion-xl-base-1.0
+  model_family: sdxl
+  output_weight_name: sfb_clean_render_lora.safetensors
+runner:
+  script_path: train_text_to_image_lora.py
+  accelerate_bin: accelerate
+  extra_args: []
+training:
+  resolution: 1024
+  train_batch_size: 1
+  gradient_accumulation_steps: 4
+  learning_rate: 0.0001
+  rank: 16
+  max_train_steps: 6000
+  checkpointing_steps: 500
+  mixed_precision: fp16
+  gradient_checkpointing: true
+  seed: 1337
+eval:
+  prompt_set: examples/eval_prompts/clean_render_prompts.txt
+  every_n_checkpoints: 1
+  num_images_per_prompt: 1
+  fixed_seed: 42

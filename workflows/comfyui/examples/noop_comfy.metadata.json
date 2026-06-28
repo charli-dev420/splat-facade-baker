@@ -1,0 +1,23 @@
+{
+  "workflow_id": "noop_comfy_image_v1",
+  "engine": "comfyui",
+  "version": "0.1.0",
+  "template_file": "noop_comfy_workflow.json",
+  "description": "Minimal ComfyUI workflow metadata example used for dry-run injection tests.",
+  "inputs": {
+    "input_image": {
+      "node_id": "1",
+      "field": "image"
+    },
+    "filename_prefix": {
+      "node_id": "2",
+      "field": "filename_prefix"
+    }
+  },
+  "outputs": {
+    "image": {
+      "node_id": "2",
+      "type": "image"
+    }
+  }
+}

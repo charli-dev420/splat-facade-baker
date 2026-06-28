@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfb-orchestrator"
+version = "0.2.6"
+description = "Local API, SQLite registry and job orchestrator for SFB"
+requires-python = ">=3.10"
+dependencies = ["fastapi>=0.110", "uvicorn>=0.27", "pydantic>=2", "httpx>=0.27", "websockets>=12"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+sfb-api = "sfb_orchestrator.api.main:main"
+sfb-orch = "sfb_orchestrator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

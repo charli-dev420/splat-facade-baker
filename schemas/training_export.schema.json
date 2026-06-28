@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/training_export.schema.json",
+  "title": "SFB Training Export Config",
+  "type": "object",
+  "required": ["schema", "task", "export_id", "dataset_hash", "records"],
+  "properties": {
+    "schema": { "const": "sfb.training_export_config.v1" },
+    "task": { "enum": ["lora_clean_render", "view_adapter"] },
+    "export_id": { "type": "string" },
+    "dataset_hash": { "type": "string" },
+    "records": { "type": "integer", "minimum": 0 },
+    "recommended_trigger": { "type": "string" },
+    "caption_format": { "type": "string" },
+    "conditioning": { "type": "object" },
+    "settings": { "type": "object" }
+  }
+}

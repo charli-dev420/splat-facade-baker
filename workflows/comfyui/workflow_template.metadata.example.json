@@ -1,0 +1,26 @@
+{
+  "workflow_id": "triposplat_from_image_v1",
+  "engine": "comfyui",
+  "template_file": "triposplat_from_image_v1.workflow.json",
+  "description": "Example metadata for a ComfyUI workflow template. The actual workflow JSON is intentionally not bundled.",
+  "inputs": {
+    "input_image": {
+      "node_id": "12",
+      "field": "image"
+    },
+    "seed": {
+      "node_id": "27",
+      "field": "seed"
+    }
+  },
+  "outputs": {
+    "splat": {
+      "node_id": "45",
+      "type": "file"
+    },
+    "preview": {
+      "node_id": "52",
+      "type": "image"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfb-scene"
+version = "0.2.8"
+description = "2.5D Scene Graph tools for Splat Facade Baker"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+sfb-scene = "sfb_scene.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

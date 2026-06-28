@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/capture_plan.schema.json",
+  "title": "SFB Capture Plan Entry",
+  "type": "object",
+  "required": [
+    "schema",
+    "dataset_id",
+    "asset_id",
+    "source_path",
+    "view_contract",
+    "view_id",
+    "azimuth_deg",
+    "elevation_deg",
+    "camera_type",
+    "output_dir",
+    "outputs"
+  ],
+  "properties": {
+    "schema": { "const": "sfb.capture_plan_entry.v1" },
+    "dataset_id": { "type": "string" },
+    "asset_id": { "type": "string" },
+    "source_path": { "type": "string" },
+    "view_contract": { "type": "string" },
+    "view_id": { "type": "string" },
+    "azimuth_deg": { "type": "number" },
+    "elevation_deg": { "type": "number" },
+    "camera_type": { "type": "string" },
+    "output_dir": { "type": "string" },
+    "outputs": {
+      "type": "object",
+      "required": ["rgb", "alpha", "depth", "normal", "camera"],
+      "properties": {
+        "rgb": { "type": "string" },
+        "alpha": { "type": "string" },
+        "depth": { "type": "string" },
+        "normal": { "type": "string" },
+        "camera": { "type": "string" }
+      }
+    }
+  }
+}

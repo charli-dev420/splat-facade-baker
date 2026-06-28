@@ -1,0 +1,71 @@
+{
+  "schema": "sfb.scene.v1",
+  "scene_id": "demo_lane_v0",
+  "units": "meters",
+  "target": {
+    "engine": "unity",
+    "platform": "mobile",
+    "camera_mode": "isometric_2_5d",
+    "mobile_profile": "mobile_mid"
+  },
+  "view_contracts": [
+    "../view_contracts/MV8_OBJECT.json"
+  ],
+  "cards": [
+    {
+      "scene_card_id": "demo_wall_001_front",
+      "asset_package": "../sfb_packages/DemoWall/asset.sfb.json",
+      "view_id": "front",
+      "view_contract": "MV8_OBJECT",
+      "position": [0.0, 0.0, 0.0],
+      "rotation_y": 0.0,
+      "base_rotation_y": 0.0,
+      "scale": [1.0, 1.0, 1.0],
+      "width_m": 8.0,
+      "height_m": 4.0,
+      "depth_m": 0.45,
+      "pivot": "bottom_center",
+      "occlusion_layer": 1,
+      "chunk_id": "chunk_001",
+      "status": "approved",
+      "card_type": "single_card",
+      "metadata": { "note": "first demo card" }
+    },
+    {
+      "scene_card_id": "demo_wall_002_front_right",
+      "asset_package": "../sfb_packages/DemoWall/asset.sfb.json",
+      "view_id": "front_right",
+      "view_contract": "MV8_OBJECT",
+      "position": [7.5, 0.0, 0.25],
+      "rotation_y": 45.0,
+      "base_rotation_y": 0.0,
+      "scale": [1.0, 1.0, 1.0],
+      "width_m": 8.0,
+      "height_m": 4.0,
+      "depth_m": 0.45,
+      "pivot": "bottom_center",
+      "occlusion_layer": 2,
+      "chunk_id": "chunk_001",
+      "status": "approved",
+      "card_type": "single_card",
+      "metadata": { "note": "second demo card rotated from ViewContract" }
+    }
+  ],
+  "chunks": [
+    {
+      "chunk_id": "chunk_001",
+      "name": "demo_lane_start",
+      "bounds": {
+        "center": [3.75, 2.0, 0.0],
+        "size": [15.75, 4.0, 6.0]
+      },
+      "mobile_profile": "mobile_mid",
+      "occlusion_layer": 1,
+      "metadata": {}
+    }
+  ],
+  "placement_rules": [],
+  "metadata": {
+    "description": "Minimal Bloc 8 demo scene made of two SFB cards."
+  }
+}

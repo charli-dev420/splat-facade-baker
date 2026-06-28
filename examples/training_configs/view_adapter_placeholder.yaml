@@ -1,0 +1,23 @@
+schema: sfb.training_config.v1
+task: view_adapter
+backend: placeholder
+status: planned
+run:
+  run_id: view_adapter_mv8_v0
+  seed: 1337
+dataset:
+  path: training_exports/view_adapter_v0
+  export_id: view_adapter_v0
+  train_file: train_pairs.jsonl
+  val_file: val_pairs.jsonl
+  test_file: test_pairs.jsonl
+view_contract: MV8_OBJECT
+conditioning:
+  source_image: true
+  target_view_token: true
+  target_camera_embedding: true
+  source_alpha: optional
+  source_depth: optional
+notes:
+  - Angle is provided by ViewContract metadata; it is never guessed by the model.
+  - This config is a scaffold for the future view-adapter runner.

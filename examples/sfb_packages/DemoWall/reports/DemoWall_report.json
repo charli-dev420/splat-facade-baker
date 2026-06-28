@@ -1,0 +1,83 @@
+{
+  "schema": "sfb.report.v1",
+  "asset_id": "DemoWall",
+  "status": "ok",
+  "warnings": [
+    "depth_range_near_limit: clipping/compression may be visible off-axis",
+    "triangle_budget_exceeded: lod0 has 2062 tris, preset budget is 800"
+  ],
+  "settings": {
+    "name": "DemoWall",
+    "width_m": 8.0,
+    "height_m": 4.0,
+    "max_depth_m": 0.45,
+    "grid": 64,
+    "alpha_threshold": 0.05,
+    "depth_invert": false,
+    "pivot": "bottom_center",
+    "mode": "depth_card",
+    "view_contract_id": "MV8_OBJECT",
+    "view_id": "front",
+    "canonical_view": "front",
+    "azimuth_deg": 0.0,
+    "elevation_deg": 10.0,
+    "mobile_tier": "mobile_mid",
+    "cleanup": true,
+    "keep_largest_component": false,
+    "remove_components_smaller_than_px": 32,
+    "fill_holes_smaller_than_px": 64,
+    "edge_feather_px": 0,
+    "depth_clip_low_percentile": 1.0,
+    "depth_clip_high_percentile": 99.0,
+    "depth_smooth_radius": 1,
+    "lod_count": 3,
+    "lod1_grid_scale": 0.5,
+    "lod2_grid_scale": 0.25,
+    "lod2_mode": "flat_card",
+    "texture_size": 512,
+    "save_clean_debug": false
+  },
+  "cleanup": {
+    "alpha_threshold": 0.05,
+    "alpha_coverage_before": 0.49767303466796875,
+    "alpha_coverage_after": 0.49767303466796875,
+    "components_before": 1,
+    "components_after": 1,
+    "removed_components": 0,
+    "filled_holes": 0,
+    "depth_low_value": 0.4274509847164154,
+    "depth_high_value": 0.8549019694328308,
+    "depth_range_before": 0.48235294222831726,
+    "depth_range_after": 1.0
+  },
+  "metrics": {
+    "vertices_lod0": 1112,
+    "triangles_lod0": 2062,
+    "lods": {
+      "lod0": {
+        "vertices": 1112,
+        "triangles": 2062
+      },
+      "lod1": {
+        "vertices": 297,
+        "triangles": 512
+      },
+      "lod2": {
+        "vertices": 4,
+        "triangles": 2
+      }
+    },
+    "alpha_coverage": 0.49767303466796875,
+    "depth_range_m": 0.44999998807907104,
+    "texture_width": 512,
+    "texture_height": 256,
+    "estimated_texture_memory_mb_uncompressed": 1.125,
+    "mobile_preset_triangle_budget_lod0": 800,
+    "mobile_preset_texture_size": 1024
+  },
+  "recommendations": [
+    "use a simple mobile cutout/opaque material",
+    "keep collision as primitive proxy",
+    "use LOD2 flat card for far distance when possible"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "dev.splatfacadebaker.unity-importer",
+  "version": "0.8.0-pre",
+  "displayName": "Splat Facade Baker Unity Importer",
+  "description": "Editor-only Unity importer for SFB 2.5D mobile packages: .sfb.json, .sfbmesh.json, textures, LODs, collider proxies and .sfbscene.json scene graphs.",
+  "unity": "2022.3",
+  "author": {
+    "name": "SFB Contributors"
+  },
+  "keywords": [
+    "splat",
+    "2.5d",
+    "mobile",
+    "importer",
+    "depth-card"
+  ],
+  "samples": [
+    {
+      "displayName": "Demo SFB Package",
+      "description": "A tiny sample package layout and importer notes.",
+      "path": "Samples~/DemoImport"
+    },
+    {
+      "displayName": "Demo SFB Scene",
+      "description": "A minimal .sfbscene.json graph made of two DemoWall cards.",
+      "path": "Samples~/DemoScene"
+    }
+  ]
+}

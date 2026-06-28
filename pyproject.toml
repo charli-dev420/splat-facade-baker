@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+testpaths = ["packages/sfb_core/tests", "packages/sfb_dataset/tests", "packages/sfb_orchestrator/tests", "packages/sfb_training/tests", "packages/sfb_scene/tests"]
+pythonpath = ["packages/sfb_core/src", "packages/sfb_dataset/src", "packages/sfb_orchestrator/src", "packages/sfb_training/src", "packages/sfb_scene/src"]
+
+[tool.ruff]
+line-length = 100

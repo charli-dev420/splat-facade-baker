@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/collider_proxy.schema.json",
+  "title": "SFB Collider Proxy",
+  "type": "object",
+  "required": ["schema", "colliders"],
+  "properties": {
+    "schema": { "const": "sfb.collider.v1" },
+    "colliders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "center", "size"],
+        "properties": {
+          "type": { "enum": ["box"] },
+          "center": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+          "size": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 }
+        }
+      }
+    }
+  }
+}

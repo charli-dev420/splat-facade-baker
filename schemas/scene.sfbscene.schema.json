@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/scene.sfbscene.schema.json",
+  "title": "SFB 2.5D Scene Graph",
+  "type": "object",
+  "required": ["schema", "scene_id", "cards"],
+  "properties": {
+    "schema": { "const": "sfb.scene.v1" },
+    "scene_id": { "type": "string" },
+    "units": { "type": "string", "default": "meters" },
+    "target": {
+      "type": "object",
+      "properties": {
+        "engine": { "type": "string" },
+        "platform": { "type": "string" },
+        "camera_mode": { "type": "string" },
+        "mobile_profile": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "view_contracts": { "type": "array", "items": { "type": "string" } },
+    "cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sceneCard" }
+    },
+    "chunks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/chunk" }
+    },
+    "placement_rules": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "metadata": { "type": "object" }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number" }
+    },
+    "vec2": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number" }
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["center", "size"],
+      "properties": {
+        "center": { "$ref": "#/$defs/vec3" },
+        "size": { "$ref": "#/$defs/vec3" }
+      }
+    },
+    "chunk": {
+      "type": "object",
+      "required": ["chunk_id"],
+      "properties": {
+        "chunk_id": { "type": "string" },
+        "name": { "type": "string" },
+        "bounds": { "$ref": "#/$defs/bounds" },
+        "mobile_profile": { "type": "string" },
+        "occlusion_layer": { "type": "integer" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "sceneCard": {
+      "type": "object",
+      "required": ["scene_card_id", "asset_package", "view_id", "position", "rotation_y"],
+      "properties": {
+        "scene_card_id": { "type": "string" },
+        "asset_package": { "type": "string" },
+        "view_id": { "type": "string" },
+        "view_contract": { "type": ["string", "null"] },
+        "source_asset_id": { "type": ["string", "null"] },
+        "position": { "$ref": "#/$defs/vec3" },
+        "rotation_y": { "type": "number" },
+        "base_rotation_y": { "type": "number" },
+        "scale": { "$ref": "#/$defs/vec3" },
+        "width_m": { "type": "number", "minimum": 0 },
+        "height_m": { "type": "number", "minimum": 0 },
+        "depth_m": { "type": "number", "minimum": 0 },
+        "pivot": { "type": "string" },
+        "occlusion_layer": { "type": "integer" },
+        "chunk_id": { "type": ["string", "null"] },
+        "status": { "type": "string" },
+        "preferred_camera_band": { "anyOf": [{ "$ref": "#/$defs/vec2" }, { "type": "null" }] },
+        "card_type": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    }
+  }
+}

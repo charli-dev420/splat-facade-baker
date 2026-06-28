@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/asset.sfb.schema.json",
+  "title": "SFB Asset Package",
+  "type": "object",
+  "required": [
+    "schema",
+    "asset_id",
+    "mode",
+    "units",
+    "mesh",
+    "textures",
+    "runtime"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sfb.asset.v1"
+    },
+    "asset_id": {
+      "type": "string"
+    },
+    "source_asset_id": {
+      "type": "string"
+    },
+    "view_contract": {
+      "type": "string"
+    },
+    "view_id": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "flat_card",
+        "depth_card",
+        "layered_card",
+        "multi_angle_impostor"
+      ]
+    },
+    "units": {
+      "type": "string"
+    },
+    "width_m": {
+      "type": "number"
+    },
+    "height_m": {
+      "type": "number"
+    },
+    "max_depth_m": {
+      "type": "number"
+    },
+    "pivot": {
+      "type": "string"
+    },
+    "mesh": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "textures": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "collision": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "report": {
+      "type": "string"
+    },
+    "preview": {
+      "type": "string"
+    }
+  }
+}

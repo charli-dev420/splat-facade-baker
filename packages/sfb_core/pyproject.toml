@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sfb-core"
+version = "0.2.3"
+description = "Core Splat Facade Baker maps-to-depth-card package"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.23",
+  "pillow>=10",
+  "trimesh>=4.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "jsonschema>=4"]
+
+[project.scripts]
+sfb = "sfb_core.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

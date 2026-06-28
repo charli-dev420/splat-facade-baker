@@ -1,0 +1,12 @@
+{
+  "workflow_id": "local_noop_v1",
+  "engine": "noop",
+  "version": "0.1.0",
+  "description": "Local no-op workflow for orchestrator registry and queue tests.",
+  "inputs": {},
+  "outputs": {
+    "report": {
+      "type": "job_report"
+    }
+  }
+}

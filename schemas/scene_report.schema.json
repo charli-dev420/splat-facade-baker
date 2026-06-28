@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://splat-facade-baker.dev/schemas/scene_report.schema.json",
+  "title": "SFB Scene Validation Report",
+  "type": "object",
+  "required": ["schema", "scene_id", "status", "metrics"],
+  "properties": {
+    "schema": { "const": "sfb.scene_report.v1" },
+    "scene_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["ok", "needs_review", "failed"] },
+    "metrics": { "type": "object" },
+    "chunks": { "type": "array" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "missing_packages": { "type": "array", "items": { "type": "string" } }
+  }
+}
