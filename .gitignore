@@ -8,6 +8,36 @@ node_modules/
 .npm-cache/
 dist/
 build/
+
+# Local datasets, generated media, and large artist assets.
+# Keep curated fixtures/examples under examples/ versionable unless explicitly ignored.
+/data/
+/dataset/
+/datasets/
+/assets/
+/images/
+/raw/
+/raw_assets/
+/sources/
+/training_exports/
+/renders/
+/captures/
+/scans/
+/photos/
+/videos/
+/models/
+/checkpoints/
+/weights/
+/dataset_assets/
+/dataset_images/
+/generated_images/
+/eval_images/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
 exports/
 workspace/
 runs/
