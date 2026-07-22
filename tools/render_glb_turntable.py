@@ -49,7 +49,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--view-contract", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--resolution", type=int, default=1024)
-    p.add_argument("--ortho-scale", type=float, default=None, help="Override camera orthographic scale")
+    p.add_argument(
+        "--ortho-scale",
+        type=float,
+        default=None,
+        help="Override camera orthographic scale",
+    )
     p.add_argument("--views", default=None, help="Optional comma-separated view_id subset")
     p.add_argument("--engine", default="BLENDER_EEVEE_NEXT", help="Blender render engine")
     return p.parse_args(_argv_after_double_dash())
@@ -149,41 +154,100 @@ def look_at(obj: object, target: Vector) -> None:
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
-def configure_camera(cam: object, *, azimuth_deg: float, elevation_deg: float, distance: float, ortho_scale: float) -> None:
+def configure_camera(
+    cam: object,
+    *,
+    azimuth_deg: float,
+    elevation_deg: float,
+    distance: float,
+    ortho_scale: float,
+) -> None:
     az = math.radians(azimuth_deg)
     el = math.radians(elevation_deg)
     horizontal = math.cos(el) * distance
-    cam.location = Vector((math.sin(az) * horizontal, -math.cos(az) * horizontal, math.sin(el) * distance))
+    cam.location = Vector(
+        (math.sin(az) * horizontal, -math.cos(az) * horizontal, math.sin(el) * distance)
+    )
     look_at(cam, Vector((0, 0, 0)))
     cam.data.ortho_scale = ortho_scale
 
 
-def setup_compositor(out_dir: Path) -> None:
+def setup_compositor(out_dir: Path, enabled_outputs: set[str] | None = None) -> None:
     scene = bpy.context.scene
-    scene.use_nodes = True
-    tree = scene.node_tree
+    if hasattr(scene, "node_tree"):
+        scene.use_nodes = True
+        tree = scene.node_tree
+    else:
+        tree = scene.compositing_node_group
+        if tree is None:
+            tree = bpy.data.node_groups.new("SFB_Compositor", "CompositorNodeTree")
+            scene.compositing_node_group = tree
     tree.nodes.clear()
     render_layers = tree.nodes.new(type="CompositorNodeRLayers")
 
-    def output_node(name: str, file_format: str, color_mode: str, socket_name: str, slot_path: str) -> None:
+    def output_node(
+        name: str,
+        file_format: str,
+        color_mode: str,
+        socket_name: str,
+        slot_path: str,
+    ) -> None:
         node = tree.nodes.new(type="CompositorNodeOutputFile")
         node.name = name
-        node.base_path = str(out_dir)
-        node.file_slots[0].path = slot_path
+        if hasattr(node, "base_path"):
+            node.base_path = str(out_dir)
+            node.file_slots[0].path = slot_path
+            input_socket = node.inputs[0]
+        else:
+            node.directory = str(out_dir)
+            node.file_name = slot_path
+            node.file_output_items.clear()
+            socket_type = {
+                "Image": "RGBA",
+                "Alpha": "FLOAT",
+                "Depth": "FLOAT",
+                "Normal": "VECTOR",
+            }[socket_name]
+            item = node.file_output_items.new(socket_type, slot_path)
+            item.override_node_format = True
+            input_socket = node.inputs[item.name]
+            fmt = item.format
+            fmt.file_format = file_format
+            if hasattr(fmt, "color_mode"):
+                fmt.color_mode = color_mode
+            if file_format == "OPEN_EXR":
+                fmt.color_depth = "32"
+            tree.links.new(render_layers.outputs[socket_name], input_socket)
+            return
         node.format.file_format = file_format
         if hasattr(node.format, "color_mode"):
             node.format.color_mode = color_mode
         if file_format == "OPEN_EXR":
             node.format.color_depth = "32"
-        tree.links.new(render_layers.outputs[socket_name], node.inputs[0])
+        tree.links.new(render_layers.outputs[socket_name], input_socket)
 
-    output_node("SFB_RGB", "PNG", "RGBA", "Image", "rgb_")
-    output_node("SFB_ALPHA", "PNG", "BW", "Alpha", "alpha_")
-    output_node("SFB_DEPTH", "OPEN_EXR", "BW", "Depth", "depth_")
-    output_node("SFB_NORMAL", "PNG", "RGB", "Normal", "normal_")
+    outputs = enabled_outputs or {"rgb_", "alpha_", "depth_", "normal_"}
+    if "rgb_" in outputs:
+        output_node("SFB_RGB", "PNG", "RGBA", "Image", "rgb_")
+    if "alpha_" in outputs:
+        output_node("SFB_ALPHA", "PNG", "BW", "Alpha", "alpha_")
+    if "depth_" in outputs:
+        output_node("SFB_DEPTH", "OPEN_EXR", "BW", "Depth", "depth_")
+    if "normal_" in outputs:
+        output_node("SFB_NORMAL", "PNG", "RGB", "Normal", "normal_")
 
 
-def rename_compositor_outputs(out_dir: Path) -> None:
+def convert_image_to_png(source: Path, target: Path) -> None:
+    image = bpy.data.images.load(str(source), check_existing=False)
+    try:
+        image.filepath_raw = str(target)
+        image.file_format = "PNG"
+        image.save()
+    finally:
+        bpy.data.images.remove(image)
+
+
+def rename_compositor_outputs(out_dir: Path, enabled_outputs: set[str] | None = None) -> None:
     mapping = {
         "rgb_": "rgb.png",
         "alpha_": "alpha.png",
@@ -191,22 +255,141 @@ def rename_compositor_outputs(out_dir: Path) -> None:
         "normal_": "normal.png",
     }
     for prefix, final_name in mapping.items():
+        if enabled_outputs is not None and prefix not in enabled_outputs:
+            continue
         candidates = sorted(out_dir.glob(f"{prefix}*"))
         if not candidates:
             continue
         target = out_dir / final_name
         if target.exists():
             target.unlink()
-        candidates[0].rename(target)
+        source = candidates[0]
+        if target.suffix.lower() == ".png" and source.suffix.lower() != ".png":
+            convert_image_to_png(source, target)
+            source.unlink(missing_ok=True)
+        else:
+            source.rename(target)
         for extra in candidates[1:]:
             extra.unlink(missing_ok=True)
 
 
-def render_view(asset_id: str, view: dict, out_root: Path, cam: object, bbox_info: dict, ortho_scale: float) -> None:
+def clear_managed_outputs(out_dir: Path) -> None:
+    patterns = [
+        "rgb.png",
+        "alpha.png",
+        "normal.png",
+        "depth.exr",
+        "camera.json",
+        "rgb_*",
+        "alpha_*",
+        "normal_*",
+        "depth_*",
+        "file_name.exr",
+    ]
+    for pattern in patterns:
+        for path in out_dir.glob(pattern):
+            if path.is_file():
+                path.unlink()
+
+
+def create_normal_material() -> object:
+    mat = bpy.data.materials.new("SFB_Normal_Override")
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    nodes.clear()
+    output = nodes.new(type="ShaderNodeOutputMaterial")
+    geometry = nodes.new(type="ShaderNodeNewGeometry")
+    add = nodes.new(type="ShaderNodeVectorMath")
+    add.operation = "ADD"
+    add.inputs[1].default_value = (1.0, 1.0, 1.0)
+    scale = nodes.new(type="ShaderNodeVectorMath")
+    scale.operation = "MULTIPLY"
+    scale.inputs[1].default_value = (0.5, 0.5, 0.5)
+    emission = nodes.new(type="ShaderNodeEmission")
+    emission.inputs["Strength"].default_value = 1.0
+    links = mat.node_tree.links
+    links.new(geometry.outputs["Normal"], add.inputs[0])
+    links.new(add.outputs["Vector"], scale.inputs[0])
+    links.new(scale.outputs["Vector"], emission.inputs["Color"])
+    links.new(emission.outputs["Emission"], output.inputs["Surface"])
+    return mat
+
+
+def render_png(path: Path, color_mode: str) -> None:
+    scene = bpy.context.scene
+    scene.render.filepath = str(path)
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = color_mode
+    bpy.ops.render.render(write_still=True)
+
+
+def save_alpha_from_rgba(source: Path, target: Path) -> None:
+    image = bpy.data.images.load(str(source), check_existing=False)
+    mask = None
+    try:
+        width, height = image.size
+        pixels = list(image.pixels)
+        mask = bpy.data.images.new("SFB_Alpha_Mask", width=width, height=height, alpha=True)
+        mask_pixels: list[float] = []
+        for idx in range(0, len(pixels), 4):
+            alpha = pixels[idx + 3]
+            mask_pixels.extend([alpha, alpha, alpha, 1.0])
+        mask.pixels.foreach_set(mask_pixels)
+        mask.filepath_raw = str(target)
+        mask.file_format = "PNG"
+        mask.save()
+    finally:
+        if mask is not None:
+            bpy.data.images.remove(mask)
+        bpy.data.images.remove(image)
+
+
+def render_blender_5_outputs(out_dir: Path) -> None:
+    scene = bpy.context.scene
+    view_layer = scene.view_layers[0]
+    world = scene.world or bpy.data.worlds.new("SFB_World")
+    scene.world = world
+    old_override = getattr(view_layer, "material_override", None)
+    old_film_transparent = scene.render.film_transparent
+    old_filepath = scene.render.filepath
+    old_file_format = scene.render.image_settings.file_format
+    old_color_mode = scene.render.image_settings.color_mode
+    old_world_color = tuple(world.color)
+    normal_mat = create_normal_material()
+    setup_compositor(out_dir, {"depth_"})
+    try:
+        view_layer.material_override = None
+        scene.render.film_transparent = True
+        rgb_path = out_dir / "rgb.png"
+        render_png(rgb_path, "RGBA")
+        save_alpha_from_rgba(rgb_path, out_dir / "alpha.png")
+
+        world.color = (0.0, 0.0, 0.0)
+        scene.render.film_transparent = False
+        view_layer.material_override = normal_mat
+        render_png(out_dir / "normal.png", "RGB")
+        rename_compositor_outputs(out_dir, {"depth_"})
+    finally:
+        view_layer.material_override = old_override
+        scene.render.film_transparent = old_film_transparent
+        scene.render.filepath = old_filepath
+        scene.render.image_settings.file_format = old_file_format
+        scene.render.image_settings.color_mode = old_color_mode
+        world.color = old_world_color
+
+
+def render_view(
+    asset_id: str,
+    view: dict,
+    out_root: Path,
+    cam: object,
+    bbox_info: dict,
+    ortho_scale: float,
+) -> None:
     view_id = view["view_id"]
     out_dir = out_root / view_id
     out_dir.mkdir(parents=True, exist_ok=True)
-    setup_compositor(out_dir)
+    clear_managed_outputs(out_dir)
     distance = float(bbox_info["max_dim"]) * 3.0 + 1.0
     configure_camera(
         cam,
@@ -215,8 +398,12 @@ def render_view(asset_id: str, view: dict, out_root: Path, cam: object, bbox_inf
         distance=distance,
         ortho_scale=ortho_scale,
     )
-    bpy.ops.render.render(write_still=False)
-    rename_compositor_outputs(out_dir)
+    if hasattr(bpy.context.scene, "node_tree"):
+        setup_compositor(out_dir)
+        bpy.ops.render.render(write_still=False)
+        rename_compositor_outputs(out_dir)
+    else:
+        render_blender_5_outputs(out_dir)
     camera_meta = {
         "schema": "sfb.camera.v1",
         "asset_id": asset_id,
@@ -234,7 +421,11 @@ def render_view(asset_id: str, view: dict, out_root: Path, cam: object, bbox_inf
 
 def main() -> int:
     if bpy is None:
-        print("This script must be executed with Blender: blender --background --python tools/render_glb_turntable.py -- ...", file=sys.stderr)
+        print(
+            "This script must be executed with Blender: "
+            "blender --background --python tools/render_glb_turntable.py -- ...",
+            file=sys.stderr,
+        )
         return 2
     args = parse_args()
     contract = json.loads(Path(args.view_contract).read_text(encoding="utf-8"))
@@ -255,7 +446,12 @@ def main() -> int:
     out_root.mkdir(parents=True, exist_ok=True)
     for view in views:
         render_view(args.asset_id, view, out_root, cam, bbox_info, ortho_scale)
-    print(json.dumps({"ok": True, "asset_id": args.asset_id, "views": len(views), "out": str(out_root)}, indent=2))
+    print(
+        json.dumps(
+            {"ok": True, "asset_id": args.asset_id, "views": len(views), "out": str(out_root)},
+            indent=2,
+        )
+    )
     return 0
 
 

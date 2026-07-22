@@ -76,3 +76,24 @@ def test_cli_create_add_validate(tmp_path: Path) -> None:
     assert main(["validate", str(scene_path), "--out", str(report_path)]) == 0
     report = json.loads(report_path.read_text())
     assert report["metrics"]["cards_total"] == 1
+
+
+def test_validate_scene_reports_corrupt_package_json(tmp_path: Path) -> None:
+    package_path = tmp_path / "Broken" / "asset.sfb.json"
+    package_path.parent.mkdir()
+    package_path.write_text("{ broken json", encoding="utf-8")
+    scene = SFBScene(scene_id="broken_scene")
+    scene.add_card(
+        SceneCard(
+            scene_card_id="broken_card",
+            asset_package=str(package_path),
+            view_id="front",
+        )
+    )
+
+    report = validate_scene(scene, scene_path=tmp_path / "scene.sfbscene.json")
+
+    assert report["status"] == "failed"
+    assert report["metrics"]["invalid_packages"] == 1
+    assert report["metrics"]["triangles_total_lod0"] == 0
+    assert any(error.startswith("invalid_package_json:broken_card:") for error in report["errors"])

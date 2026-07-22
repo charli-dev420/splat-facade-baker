@@ -8,11 +8,16 @@ from .models import SFBScene
 from .placement import card_axis_aligned_bounds, union_bounds
 
 
-def _read_package(path: Path) -> dict[str, Any]:
+def _read_json_object(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return None, f"{exc.msg} at line {exc.lineno} column {exc.colno}"
+    except Exception as exc:  # noqa: BLE001 - validation reports file/read failures.
+        return None, f"{type(exc).__name__}: {exc}"
+    if not isinstance(data, dict):
+        return None, "JSON root must be an object"
+    return data, None
 
 
 def validate_scene(scene: SFBScene, *, scene_path: str | Path | None = None) -> dict[str, Any]:
@@ -23,6 +28,8 @@ def validate_scene(scene: SFBScene, *, scene_path: str | Path | None = None) -> 
     total_texture_memory = 0.0
     alpha_cards = 0
     packages_found = 0
+    invalid_packages = 0
+    invalid_reports = 0
     missing_packages: list[str] = []
     package_paths_seen: set[str] = set()
 
@@ -36,7 +43,11 @@ def validate_scene(scene: SFBScene, *, scene_path: str | Path | None = None) -> 
             continue
         packages_found += 1
         package_paths_seen.add(str(package_path))
-        package = _read_package(package_path)
+        package, package_error = _read_json_object(package_path)
+        if package is None:
+            invalid_packages += 1
+            errors.append(f"invalid_package_json:{card.scene_card_id}:{package_path}:{package_error}")
+            continue
         mesh = package.get("mesh", {}) if isinstance(package.get("mesh"), dict) else {}
         runtime = package.get("runtime", {}) if isinstance(package.get("runtime"), dict) else {}
         total_triangles += int(mesh.get("triangles_lod0") or 0)
@@ -45,7 +56,11 @@ def validate_scene(scene: SFBScene, *, scene_path: str | Path | None = None) -> 
         report_rel = package.get("report")
         if report_rel:
             report_path = package_path.parent / str(report_rel)
-            report = _read_package(report_path) if report_path.exists() else {}
+            report, report_error = _read_json_object(report_path) if report_path.exists() else ({}, None)
+            if report is None:
+                invalid_reports += 1
+                errors.append(f"invalid_report_json:{card.scene_card_id}:{report_path}:{report_error}")
+                continue
             metrics = report.get("metrics", {}) if isinstance(report.get("metrics"), dict) else {}
             total_texture_memory += float(metrics.get("estimated_texture_memory_mb_uncompressed") or 0.0)
             if report.get("status") in {"failed", "rejected"}:
@@ -88,6 +103,8 @@ def validate_scene(scene: SFBScene, *, scene_path: str | Path | None = None) -> 
             "chunks_total": len(scene.chunks),
             "packages_found": packages_found,
             "missing_packages": len(missing_packages),
+            "invalid_packages": invalid_packages,
+            "invalid_reports": invalid_reports,
             "unique_packages": len(package_paths_seen),
             "triangles_total_lod0": total_triangles,
             "estimated_texture_memory_mb_uncompressed": round(total_texture_memory, 3),

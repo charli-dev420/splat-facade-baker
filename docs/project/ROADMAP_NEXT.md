@@ -49,8 +49,9 @@ This document lists the next practical tasks after the v2.9 private repo setup.
 - [ ] Implement robust output collection from ComfyUI history.
 - [ ] Add job retry rules for ComfyUI failures.
 - [ ] Add batch review of generated outputs.
+- [ ] Promote a real operator-owned workflow into `workflows/comfyui/examples/` only after live validation.
 
-## Priority 3 — Splat backend
+## Priority 3 — Experimental splat backend
 
 - [ ] Choose initial splat format: PLY first.
 - [ ] Implement canonical camera resolver for splat render.
@@ -58,6 +59,7 @@ This document lists the next practical tasks after the v2.9 private repo setup.
 - [ ] Render RGB/alpha/depth from known `view_id`.
 - [ ] Route results into `bake-maps`.
 - [ ] Add previews and reports.
+- [ ] Remove `experimental` / `excluded_pre_mvp` labels only after validated renderer tests exist.
 
 ## Priority 4 — Training loop
 

@@ -1,11 +1,11 @@
 # Splat Facade Baker
 
-**Splat Facade Baker (SFB)** is an offline toolchain for turning controlled renders, RGB/alpha/depth maps, and eventually Gaussian Splat outputs into lightweight **2.5D depth-card assets** for mobile game environments.
+**Splat Facade Baker (SFB)** is an offline toolchain for turning controlled renders and RGB/alpha/depth maps into lightweight **2.5D depth-card assets** for mobile game environments. The splat path is experimental and excluded from the current MVP.
 
-It is designed for workflows where a splat or clean image has one excellent canonical view, but the full 360° geometry is too noisy, too heavy, or unnecessary for mobile.
+It is designed for workflows where a clean image or controlled render has one excellent canonical view, but the full 360° geometry is too noisy, too heavy, or unnecessary for mobile.
 
 ```text
-clean view / maps / splat
+clean view / maps
 → known ViewContract camera
 → RGB + alpha + depth
 → cleanup
@@ -25,6 +25,7 @@ clean view / maps / splat
 
 - It does not reconstruct a clean 360° mesh.
 - It does not run Gaussian Splatting on mobile.
+- It does not ship an MVP splat renderer; `sfb bake-splat` is experimental and returns `not_implemented`.
 - It does not replace Blender, Unity or ComfyUI.
 - It does not ship trained model weights or datasets.
 
@@ -55,7 +56,8 @@ Working now:
 Structured but intentionally incomplete:
 
 - actual GPU training execution depends on external Diffusers/Kohya environments; v2.5 provides run/checkpoint/eval tooling and dry-runs.
-- ComfyUI custom nodes beyond API orchestration.
+- `sfb bake-splat` is experimental and excluded from the MVP until a validated renderer exists.
+- ComfyUI custom nodes beyond API orchestration are experimental scaffolds, not product demos.
 - Unity importer has not been compiled inside Unity in this environment; it is implemented as an Editor package and must be tested in a real Unity project.
 
 
@@ -64,6 +66,7 @@ Structured but intentionally incomplete:
 - [Project status](docs/project/PROJECT_STATUS.md)
 - [Known limitations](docs/project/KNOWN_LIMITATIONS.md)
 - [Roadmap of pursuit](docs/project/ROADMAP_NEXT.md)
+- [MVP demos and local gates](docs/demos/MVP_DEMOS.md)
 - [Private GitHub setup](docs/setup/GITHUB_PRIVATE_SETUP.md)
 - [v2.9 release notes](docs/release/RELEASE_NOTES_v2.9_private_ready.md)
 
@@ -304,7 +307,7 @@ Tools/SFB/Apply Texture Settings To Selected Packages
 
 1. **Dataset Factory + ViewContract** — render GLB assets through fixed camera contracts.
 2. **Local Orchestrator + ComfyUI background** — job queue, artifact registry, workflow execution.
-3. **Splat / Map Baker Core** — maps/splats to mobile 2.5D assets.
+3. **Map Baker Core** — maps to mobile 2.5D assets; splat input remains experimental and non-MVP.
 4. **Training Prep** — LoRA clean-render datasets and view-pair datasets.
 5. **Training Runner** — versioned runs, checkpoints, evaluation and model registry.
 6. **Studio UI** — production dashboard, review queue, jobs, bakes and training pages.

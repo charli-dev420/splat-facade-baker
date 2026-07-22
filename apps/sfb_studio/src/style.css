@@ -9,6 +9,8 @@ body { margin: 0; min-width: 960px; background: radial-gradient(circle at top le
 button { border: 1px solid #30363d; background: #161b22; color: #e6edf3; border-radius: 8px; padding: 8px 10px; cursor: pointer; }
 button:hover { border-color: #58a6ff; background: #1f2937; }
 button.active { background: #1f6feb; border-color: #388bfd; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+button:disabled:hover { border-color: #30363d; background: #161b22; }
 main { padding: 24px; max-width: 1680px; margin: 0 auto; }
 .app-header { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 22px; }
 .brand { display: flex; gap: 14px; align-items: center; }
@@ -49,6 +51,10 @@ tr:hover td { background: rgba(88, 166, 255, .04); }
 .actions button, .link-button { font-size: 12px; padding: 5px 8px; }
 .link-button { color: #79c0ff; background: transparent; border-color: transparent; padding-left: 0; }
 .empty-state { color: #8b949e; padding: 18px; border: 1px dashed #30363d; border-radius: 10px; background: rgba(13, 17, 23, .45); }
+.loading-state, .error-state { display: flex; flex-direction: column; gap: 6px; }
+.state-title { color: #c9d1d9; }
+.error-state .state-title { color: #ff7b72; }
+.error-state small { color: #8b949e; }
 .json-block, pre { white-space: pre-wrap; word-break: break-word; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 12px; border-radius: 10px; max-height: 440px; overflow: auto; }
 .drawer { position: fixed; right: 20px; top: 20px; bottom: 20px; width: 520px; overflow: auto; background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 18px; box-shadow: -20px 0 60px rgba(0,0,0,.45); z-index: 10; }
 .close { float: right; border-radius: 999px; width: 32px; height: 32px; padding: 0; }

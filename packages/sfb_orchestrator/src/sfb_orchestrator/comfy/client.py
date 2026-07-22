@@ -60,6 +60,14 @@ class ComfyClient:
             response.raise_for_status()
             return response.json()
 
+    def interrupt(self) -> dict[str, Any]:
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(f"{self.base_url}/interrupt")
+            response.raise_for_status()
+            if response.content:
+                return response.json()
+            return {"ok": True}
+
     def wait_for_history(self, prompt_id: str, *, poll_interval: float = 1.0, timeout_s: float = 3600.0) -> dict[str, Any]:
         start = time.monotonic()
         while True:

@@ -8,7 +8,7 @@ This repository contains the full scaffold and the first executable paths for Sp
 
 - `sfb_core`: synthetic maps → depth-card SFB package.
 - `sfb_dataset`: ViewContract validation, GLB/GLTF scan, capture plans, expected views, splits, capture validation.
-- `sfb_orchestrator`: local SQLite registry, jobs, artifacts, workflows, FastAPI API, ComfyUI dry-run support.
+- `sfb_orchestrator`: local SQLite registry, jobs, artifacts, workflows, FastAPI API, ComfyUI API orchestration and dry-run fixtures.
 - `sfb_training`: training prep exports, TrainingRun registry, command generation, dry-run runner, clean-render image evaluation, model registry.
 - `sfb_scene`: SceneCard and chunk scene graph CLI with validation.
 - `apps/sfb_studio`: React/Vite app builds successfully.
@@ -22,7 +22,7 @@ This repository contains the full scaffold and the first executable paths for Sp
 
 ## Not implemented yet
 
-- `sfb bake-splat`: canonical splat → RGB/alpha/depth backend.
+- `sfb bake-splat`: experimental non-MVP command stub that returns `not_implemented`.
 - gsplat backend integration.
 - robust ComfyUI output collection for real graph outputs.
 - parallel orchestrator workers.

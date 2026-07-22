@@ -49,7 +49,11 @@ def _add_bake_maps(subparsers: argparse._SubParsersAction) -> None:
 
 
 def _add_bake_splat(subparsers: argparse._SubParsersAction) -> None:
-    p = subparsers.add_parser("bake-splat", help="Future splat → maps → SFB package command. Scaffolded in v2.3.")
+    p = subparsers.add_parser(
+        "bake-splat",
+        help="Experimental, non-MVP splat -> maps command. Returns not_implemented until a renderer is integrated.",
+        description="Experimental, non-MVP splat -> maps command. Returns not_implemented until a renderer is integrated.",
+    )
     p.add_argument("--input", required=True, help="Input .ply/.splat/.spz")
     p.add_argument("--out", required=True)
     p.add_argument("--view-contract", required=True)
@@ -157,7 +161,13 @@ def main(argv: list[str] | None = None) -> int:
         try:
             render_splat_to_maps(request)
         except NotImplementedError as exc:
-            print(json.dumps({"ok": False, "status": "not_implemented", "message": str(exc)}, indent=2))
+            print(json.dumps({
+                "ok": False,
+                "status": "not_implemented",
+                "experimental": True,
+                "mvp_contract": "excluded_pre_mvp",
+                "message": str(exc),
+            }, indent=2))
             return 3
         return 0
 

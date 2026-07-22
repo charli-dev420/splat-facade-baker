@@ -51,10 +51,16 @@ namespace SFB.Editor
                 if (rootJson.TryGetValue("cards", out object cardsObj) && cardsObj is List<object> cards)
                 {
                     metadata.cardCount = cards.Count;
+                    int createdCards = 0;
                     foreach (object item in cards)
                     {
                         if (!(item is Dictionary<string, object> card)) continue;
                         CreateCardObject(ctx, root, chunkParents, card);
+                        createdCards++;
+                    }
+                    if (createdCards != cards.Count)
+                    {
+                        Debug.LogWarning($"[SFB] Scene {sceneId}: created {createdCards}/{cards.Count} card metadata objects.");
                     }
                 }
 
@@ -107,6 +113,16 @@ namespace SFB.Editor
             if (child.transform.localScale == Vector3.zero) child.transform.localScale = Vector3.one;
 
             var metadata = child.AddComponent<SFBSceneCardMetadata>();
+            FillCardMetadata(metadata, card, cardId, assetPackage, chunkId);
+        }
+
+        private static void FillCardMetadata(
+            SFBSceneCardMetadata metadata,
+            Dictionary<string, object> card,
+            string cardId,
+            string assetPackage,
+            string chunkId)
+        {
             metadata.sceneCardId = cardId;
             metadata.assetPackage = assetPackage;
             metadata.viewId = SFBPackageReader.GetString(card, "view_id", "");

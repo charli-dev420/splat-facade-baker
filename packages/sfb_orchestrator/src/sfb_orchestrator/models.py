@@ -7,6 +7,7 @@ JobStatus = Literal[
     "created",
     "queued",
     "running",
+    "cancelling",
     "collecting_outputs",
     "completed",
     "failed",
@@ -74,6 +75,11 @@ class JobRecord(BaseModel):
     finished_at: str | None = None
     error_type: str | None = None
     error_message: str | None = None
+    heartbeat_at: str | None = None
+    cancel_requested_at: str | None = None
+    cancel_reason: str | None = None
+    worker_id: str | None = None
+    process_id: int | None = None
 
 
 class ArtifactRecord(BaseModel):

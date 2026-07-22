@@ -8,7 +8,7 @@
   "2": {
     "class_type": "SaveImage",
     "inputs": {
-      "filename_prefix": "SFB/noop",
+      "filename_prefix": "SFB/dry_run_fixture",
       "images": ["1", 0]
     }
   }

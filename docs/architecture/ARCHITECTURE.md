@@ -22,7 +22,7 @@ albedo + alpha + depth
 → asset.sfb.json
 ```
 
-## Future splat path
+## Experimental Non-MVP Splat Path
 
 ```text
 PLY/SPZ/SPLAT
@@ -31,4 +31,6 @@ PLY/SPZ/SPLAT
 → same deterministic maps-to-depth-card path
 ```
 
-Splat rendering is intentionally not implemented in v2.3; the typed stub lives in `sfb_core.splat_maps`.
+Splat rendering is intentionally excluded from the current MVP. `sfb bake-splat`
+is kept as an experimental typed stub so future renderer work can plug into the
+same maps-to-depth-card path without changing the stable MVP contract.

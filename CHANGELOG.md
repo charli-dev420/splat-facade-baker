@@ -3,6 +3,10 @@
 
 ## v2.9 — Private repo ready
 
+- Hardened the local orchestrator API file serving, job creation and shell execution boundaries.
+- Added atomic job claiming, bounded auto-retry, strict workspace-scoped output registration and artifact de-duplication.
+- Clarified the MVP contract: `bake-splat` is experimental/non-MVP, public Training and ComfyUI examples no longer ship placeholders, and local demo gates are documented.
+- Fixed bake validation so corrupt package/report JSON returns `invalid_package_json` instead of empty metrics.
 - Added GitHub issue templates and PR template.
 - Added project status, known limitations, release notes and roadmap of pursuit.
 - Added private GitHub setup guide.
@@ -69,7 +73,7 @@
 - Added far LOD flat-card option.
 - Added `.sfbmesh.json` normals and mesh counts.
 - Added mobile preset warnings and richer `bake_report.json`.
-- Added `bake-splat` scaffold for future canonical splat rendering.
+- Added experimental `bake-splat` scaffold for future canonical splat rendering.
 - Added Bloc 3 docs and tests.
 
 

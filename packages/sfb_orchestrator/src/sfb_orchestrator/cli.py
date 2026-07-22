@@ -8,7 +8,7 @@ from typing import Any
 
 from .comfy.client import ComfyClient
 from .db.store import OrchestratorStore
-from .jobs.runner import JobRunner
+from .jobs.runner import JobRunner, _normalize_shell_command, make_worker_id
 from .models import WorkflowRecord
 from .paths import SFBWorkspace
 from .utils import read_json, write_json
@@ -89,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
     job_create.add_argument("--workflow-id", default=None)
     job_create.add_argument("--asset-id", default=None)
     job_create.add_argument("--priority", type=int, default=50)
+    job_create.add_argument("--max-attempts", type=int, default=3)
     job_create.add_argument("--params-json", default=None)
     job_create.add_argument("--param", action="append", default=[])
     job_create.add_argument("--status", default="queued")
@@ -182,12 +183,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "jobs":
         if args.jobs_command == "create":
             params = _parse_params(args.param, args.params_json)
+            if args.engine == "shell":
+                params["command"] = _normalize_shell_command(params.get("command"))
             job = store.create_job(
                 args.project_id,
                 engine=args.engine,
                 workflow_id=args.workflow_id,
                 asset_id=args.asset_id,
                 priority=args.priority,
+                max_attempts=args.max_attempts,
                 params=params,
                 status=args.status,
             )
@@ -203,11 +207,11 @@ def main(argv: list[str] | None = None) -> int:
             _print(store.retry_job(args.job_id).model_dump())
             return 0
         if args.jobs_command == "run-next":
-            job = JobRunner(store, _workspace(args)).run_next(args.project_id)
+            job = JobRunner(store, _workspace(args), worker_id=make_worker_id("cli_run_next")).run_next(args.project_id)
             _print({"job": None if job is None else job.model_dump()})
             return 0
         if args.jobs_command == "run-all":
-            runner = JobRunner(store, _workspace(args))
+            runner = JobRunner(store, _workspace(args), worker_id=make_worker_id("cli_run_all"))
             results = []
             for _ in range(args.limit):
                 job = runner.run_next(args.project_id)
@@ -245,6 +249,8 @@ def main(argv: list[str] | None = None) -> int:
                     "capture_plan_entries": rows,
                     "output_paths": output_paths,
                 }
+                if args.engine == "shell":
+                    params["command"] = _normalize_shell_command(params.get("command"))
                 job = store.create_job(
                     args.project_id,
                     engine=args.engine,
@@ -266,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "worker":
-        runner = JobRunner(store, _workspace(args))
+        runner = JobRunner(store, _workspace(args), worker_id=make_worker_id("worker"))
         processed = 0
         while True:
             job = runner.run_next(args.project_id)

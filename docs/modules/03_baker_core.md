@@ -1,4 +1,4 @@
-# Bloc 3 — Splat / Map Baker Core
+# Bloc 3 — Map Baker Core
 
 The Baker Core is the runtime-independent part of SFB that turns a known view into a lightweight mobile asset.
 
@@ -33,7 +33,7 @@ Implemented:
 - `.glb`, `.obj` and `.sfbmesh.json` export per LOD;
 - mobile preset warnings;
 - richer `bake_report.json` with cleanup and mobile metrics;
-- `bake-splat` command scaffold for the future gsplat backend.
+- `bake-splat` experimental non-MVP command scaffold for a future renderer.
 
 Not implemented yet:
 
@@ -139,9 +139,11 @@ exports/DemoWall/
    └─ DemoWall_report.json
 ```
 
-## Splat backend scaffold
+## Experimental Splat Backend Scaffold
 
-The command exists but intentionally returns `not_implemented` in v2.3:
+The command exists only to reserve the interface for future renderer work. It is
+experimental, excluded from the current MVP, and intentionally returns
+`not_implemented`:
 
 ```bash
 sfb bake-splat \

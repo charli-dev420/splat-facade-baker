@@ -27,13 +27,35 @@ def main() -> int:
     parser.add_argument("package", help="Path to asset.sfb.json")
     args = parser.parse_args()
     package_path = Path(args.package)
-    data = json.loads(package_path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(package_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(json.dumps({
+            "ok": False,
+            "status": "invalid_package_json",
+            "errors": [f"invalid_package_json:{package_path}:{exc.msg} at line {exc.lineno} column {exc.colno}"],
+        }, indent=2))
+        return 1
+    except Exception as exc:  # noqa: BLE001 - validation CLI returns structured failures.
+        print(json.dumps({
+            "ok": False,
+            "status": "invalid_package_json",
+            "errors": [f"invalid_package_json:{package_path}:{type(exc).__name__}: {exc}"],
+        }, indent=2))
+        return 1
+    if not isinstance(data, dict):
+        print(json.dumps({
+            "ok": False,
+            "status": "invalid_package_json",
+            "errors": [f"invalid_package_json:{package_path}:JSON root must be an object"],
+        }, indent=2))
+        return 1
     root = package_path.parent
     missing = []
     for field, rel in _collect_paths(data):
         if not (root / rel).exists():
             missing.append(f"{field}: {rel}")
-    print(json.dumps({"ok": not missing, "missing": missing}, indent=2))
+    print(json.dumps({"ok": not missing, "status": "ok" if not missing else "missing_files", "missing": missing}, indent=2))
     return 0 if not missing else 1
 
 

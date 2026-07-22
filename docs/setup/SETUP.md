@@ -57,7 +57,8 @@ http://127.0.0.1:8765
 
 ## Optional tools
 
-- ComfyUI for generation and splat workflows.
+- ComfyUI for external generation workflows. Splat workflows remain experimental
+  until a real operator-owned template is validated.
 - Blender for GLB turntable captures.
 - Unity for prefab import.
 
@@ -66,3 +67,48 @@ http://127.0.0.1:8765
 ```bash
 pytest
 ```
+
+## Complete validation gate
+
+Run the deterministic repo gate and write a normalized proof report:
+
+```bash
+python tools/run_validation_pipeline.py --skip-slow
+```
+
+Reports are written under `workspace/validation_reports/`, including
+`latest.json`, a timestamped JSON report and per-step stdout/stderr logs. The
+gate uses `git -c safe.directory=<repo>` internally so it does not mutate global
+Git config. To fix Windows dubious-ownership warnings permanently on this
+checkout, run:
+
+```bash
+git config --global --add safe.directory D:/Dev/splat/splat-facade-baker-v2.8-scene-graph
+```
+
+Optional native checks:
+
+```bash
+python tools/run_validation_pipeline.py --include-blender
+python tools/run_validation_pipeline.py --include-blender --fail-on-blocked
+python tools/run_validation_pipeline.py --include-unity
+python tools/run_validation_pipeline.py --include-comfy-live --fail-on-blocked
+```
+
+To inspect existing workspace content instead of only the deterministic
+synthetic bake path, add:
+
+```bash
+python tools/run_validation_pipeline.py --skip-slow --real-workspace-smoke
+```
+
+Studio exposes the same report family on the Validation page through the local
+API. The Studio run button uses `--skip-slow` by default and keeps Blender,
+Unity, ComfyUI live and real workspace smoke as explicit options.
+
+Blender certification renders `rgb.png`, `alpha.png`, `normal.png`,
+`depth.exr` and `camera.json` for the requested views, then validates PNG
+dimensions and camera metadata. Unity certification imports DemoWall and
+`demo_lane_v0`, then verifies metadata, LOD/render/collider objects and
+scene card/chunk counts. Missing Blender, Unity or license state is reported as
+`blocked_*` unless `--fail-on-blocked` is used.

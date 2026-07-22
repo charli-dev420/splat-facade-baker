@@ -13,25 +13,29 @@ SFB Orchestrator
 
 ComfyUI is treated as a background worker. The local registry remains the source of truth for jobs and artifacts.
 
-## Dry-run test
+## MVP Contract
+
+ComfyUI is an external local worker. SFB owns orchestration, artifact inventory,
+post-processing decisions and Unity handoff. Public MVP examples do not include
+fake workflows or no-op demos.
+
+## Dry-run gate
 
 ```bash
-sfb-orch --workspace workspace workflows register \
-  workflows/comfyui/examples/noop_comfy.metadata.json \
-  --project-id demo
-
-sfb-orch --workspace workspace jobs create \
-  --project-id demo \
-  --engine comfyui \
-  --workflow-id noop_comfy_image_v1 \
-  --param input_image='"asset_front.png"' \
-  --param filename_prefix='"SFB/test"' \
-  --param dry_run=true
-
-sfb-orch --workspace workspace jobs run-next --project-id demo
+python tools/comfyui_demo_gate.py --workspace workspace/comfyui_demo_gate
 ```
 
-This writes the injected workflow as an artifact without contacting ComfyUI.
+This writes an injected workflow artifact from a test fixture without contacting
+ComfyUI. It proves the orchestrator path, not generation quality.
+
+Live validation requires a reachable ComfyUI server and a real operator-owned
+metadata file:
+
+```bash
+python tools/comfyui_demo_gate.py \
+  --comfy-url http://127.0.0.1:8188 \
+  --live-metadata path/to/real_workflow.metadata.json
+```
 
 ## Live status
 
@@ -39,4 +43,5 @@ This writes the injected workflow as an artifact without contacting ComfyUI.
 sfb-orch comfy status --url http://127.0.0.1:8188
 ```
 
-Custom nodes remain placeholders. The preferred pre-MVP path is API orchestration, not putting the whole SFB pipeline inside ComfyUI nodes.
+Custom nodes remain experimental scaffolds. The preferred MVP path is API
+orchestration, not putting the whole SFB pipeline inside ComfyUI nodes.

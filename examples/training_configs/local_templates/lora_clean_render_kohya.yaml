@@ -8,7 +8,7 @@ dataset:
   path: training_exports/lora_clean_render_v0
   export_id: lora_clean_render_v0
 model:
-  base_model: /path/to/base_model.safetensors
+  base_model: C:/models/sdxl/base_model.safetensors
   model_family: sdxl
   output_weight_name: sfb_clean_render_lora.safetensors
 runner:

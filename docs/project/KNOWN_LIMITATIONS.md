@@ -10,13 +10,13 @@ The repository includes scaffolds for Unity, Blender and ComfyUI, but these inte
 
 ## Splat backend
 
-The `bake-splat` command is intentionally scaffolded but not implemented. The current stable path is:
+The `bake-splat` command is experimental, excluded from the current MVP, and intentionally returns `not_implemented`. The current stable path is:
 
 ```text
 albedo + alpha + depth → cleanup → depth-card → SFB package
 ```
 
-The planned path is:
+The future path is:
 
 ```text
 splat + ViewContract camera → RGB/alpha/depth → same bake-maps pipeline
@@ -24,7 +24,7 @@ splat + ViewContract camera → RGB/alpha/depth → same bake-maps pipeline
 
 ## Training
 
-The Training Runner generates reproducible commands and dry-runs. Real GPU training depends on local Diffusers/Kohya setup, model licenses, dataset availability, and GPU memory.
+The Training Runner generates reproducible commands and dry-runs for supported local backends. Real GPU training depends on local Diffusers/Kohya setup, model licenses, dataset availability, and GPU memory. Placeholder training backends are not part of the public MVP contract.
 
 ## Data policy
 

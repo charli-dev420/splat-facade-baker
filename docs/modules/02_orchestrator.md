@@ -22,9 +22,11 @@ Implemented:
 - asset import from `dataset_manifest`.
 - workflow metadata registry.
 - job queue.
+- atomic SQLite job claiming.
+- automatic retry up to `max_attempts`.
 - artifact registry.
 - local `noop` engine.
-- local `shell` engine.
+- local CLI-only `shell` engine.
 - `sfb_bake_maps` engine wrapper.
 - `blender_capture` job wrapper.
 - ComfyUI HTTP client.
@@ -39,7 +41,7 @@ Not implemented yet:
 - full ComfyUI output file download/copy policy.
 - advanced retry classes.
 - websocket live UI events.
-- job cancellation of external subprocesses.
+- stale-worker recovery and automatic dead-worker requeue.
 - authentication. This is a local development server.
 
 ## Install
@@ -95,6 +97,7 @@ sfb-orch --workspace workspace assets list --project-id medieval_sfb_v1
 sfb-orch --workspace workspace jobs create \
   --project-id medieval_sfb_v1 \
   --engine noop \
+  --max-attempts 3 \
   --param note='"first queue test"'
 
 sfb-orch --workspace workspace jobs run-next \
@@ -140,27 +143,19 @@ sfb-orch --workspace workspace worker \
   --poll-interval 2
 ```
 
-## Register a ComfyUI workflow metadata file
+## ComfyUI Workflow Gates
+
+ComfyUI examples are not shipped as public product demos until they have a real
+operator-owned workflow template and live validation. The repository keeps a
+dry-run fixture under tests so the orchestrator injection path stays covered
+without presenting a no-op graph as an MVP demo.
 
 ```bash
-sfb-orch --workspace workspace workflows register \
-  workflows/comfyui/examples/noop_comfy.metadata.json \
-  --project-id medieval_sfb_v1
+python tools/comfyui_demo_gate.py --workspace workspace/comfyui_demo_gate
 ```
 
-Create a ComfyUI dry-run job. This does not contact ComfyUI; it only injects parameters into the workflow template and registers the injected workflow as an artifact.
-
-```bash
-sfb-orch --workspace workspace jobs create \
-  --project-id medieval_sfb_v1 \
-  --engine comfyui \
-  --workflow-id noop_comfy_image_v1 \
-  --param input_image='"asset_front.png"' \
-  --param filename_prefix='"SFB/test"' \
-  --param dry_run=true
-
-sfb-orch --workspace workspace jobs run-next --project-id medieval_sfb_v1
-```
+The gate always runs the orchestrator dry-run fixture. Live ComfyUI validation
+requires a reachable server and an operator-provided real metadata file.
 
 ## Check ComfyUI status
 
@@ -203,7 +198,24 @@ POST /api/jobs/{job_id}/retry
 POST /api/jobs/run-next
 GET  /api/artifacts
 GET  /api/comfy/status
+GET  /api/file?path=...
 ```
+
+The HTTP API accepts only `noop`, `comfyui`, `sfb_bake_maps` and `blender_capture`
+jobs. Direct `shell` jobs are intentionally rejected over HTTP.
+`/api/file` serves only files resolved inside the active workspace or artifact
+directory.
+Jobs are claimed atomically in SQLite. A failed attempt is requeued while
+`attempt < max_attempts`; after the final attempt the job becomes `failed`.
+Manual retry is only allowed from terminal/review states and resets `attempt` to
+`0`.
+Claimed jobs expose `worker_id`, `process_id`, `heartbeat_at`,
+`cancel_requested_at` and `cancel_reason`. Cancelling a queued job moves it
+directly to `cancelled`. Cancelling a running job moves it to `cancelling`; the
+runner then stops its local subprocess best-effort and marks the job
+`cancelled` only after the process has ended. ComfyUI cancellation stops the
+orchestrator wait loop and attempts ComfyUI `/interrupt`, but the external
+ComfyUI server remains responsible for prompts that already completed.
 
 ## Studio UI
 
@@ -223,7 +235,9 @@ Writes a small job report and completes. Useful for testing the registry and UI.
 
 ### `shell`
 
-Runs `params.command`. Example:
+CLI-only local operator engine. It is not accepted by `POST /api/jobs`.
+`params.command` must be a JSON argv array; shell command strings are rejected.
+Example:
 
 ```bash
 sfb-orch --workspace workspace jobs create \
@@ -250,6 +264,11 @@ Optional params:
 ```text
 name, width_m, height_m, max_depth_m, grid, view_contract, view_id, mobile_tier
 ```
+
+Declared `output_paths` are strict: they must be JSON arrays of file paths that
+resolve inside the active workspace and exist after a successful process run.
+Missing, malformed or out-of-workspace outputs fail the job instead of being
+silently ignored.
 
 ### `blender_capture`
 

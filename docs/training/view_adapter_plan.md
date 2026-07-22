@@ -6,4 +6,7 @@ The view adapter will learn:
 source image + target_view_id + target camera metadata → target image
 ```
 
-The angle is provided by `ViewContract`; it is never guessed by the model. v2.5 only ships the placeholder config and runner scaffold.
+The angle is provided by `ViewContract`; it is never guessed by the model. The
+View Adapter remains a plan until a real runner, dataset and evaluation loop are
+validated. No public placeholder backend or runnable demo config is shipped for
+this path.

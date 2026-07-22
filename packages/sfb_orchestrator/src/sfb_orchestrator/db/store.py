@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS jobs (
   finished_at TEXT,
   error_type TEXT,
   error_message TEXT,
+  heartbeat_at TEXT,
+  cancel_requested_at TEXT,
+  cancel_reason TEXT,
+  worker_id TEXT,
+  process_id INTEGER,
   FOREIGN KEY(project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_jobs_status_priority ON jobs(status, priority DESC, created_at ASC);
@@ -113,6 +118,20 @@ class OrchestratorStore:
     def init_db(self) -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.executescript(SCHEMA_SQL)
+            self._migrate_jobs_lifecycle(conn)
+
+    def _migrate_jobs_lifecycle(self, conn: sqlite3.Connection) -> None:
+        existing = {row[1] for row in conn.execute("PRAGMA table_info(jobs)").fetchall()}
+        columns = {
+            "heartbeat_at": "TEXT",
+            "cancel_requested_at": "TEXT",
+            "cancel_reason": "TEXT",
+            "worker_id": "TEXT",
+            "process_id": "INTEGER",
+        }
+        for name, sql_type in columns.items():
+            if name not in existing:
+                conn.execute(f"ALTER TABLE jobs ADD COLUMN {name} {sql_type}")
 
     def create_project(
         self,
@@ -414,6 +433,8 @@ class OrchestratorStore:
         max_attempts: int = 3,
         job_id: str | None = None,
     ) -> JobRecord:
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be >= 1")
         now = utc_now_iso()
         params = params or {}
         r_hash = recipe_hash(project_id, engine, workflow_id, asset_id, params)
@@ -467,26 +488,106 @@ class OrchestratorStore:
             }
         return {"total": total, "by_status": by_status}
 
-    def claim_next_job(self, project_id: str | None = None) -> JobRecord | None:
+    def claim_next_job(self, project_id: str | None = None, *, worker_id: str | None = None) -> JobRecord | None:
         now = utc_now_iso()
         with self.connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
             if project_id:
                 row = conn.execute(
-                    "SELECT * FROM jobs WHERE status='queued' AND project_id=? ORDER BY priority DESC, created_at ASC LIMIT 1",
+                    """
+                    SELECT * FROM jobs
+                    WHERE status='queued' AND attempt < max_attempts AND project_id=?
+                    ORDER BY priority DESC, created_at ASC
+                    LIMIT 1
+                    """,
                     (project_id,),
                 ).fetchone()
             else:
                 row = conn.execute(
-                    "SELECT * FROM jobs WHERE status='queued' ORDER BY priority DESC, created_at ASC LIMIT 1"
+                    """
+                    SELECT * FROM jobs
+                    WHERE status='queued' AND attempt < max_attempts
+                    ORDER BY priority DESC, created_at ASC
+                    LIMIT 1
+                    """
                 ).fetchone()
             if row is None:
                 return None
             job_id = row["job_id"]
-            conn.execute(
-                "UPDATE jobs SET status='running', started_at=?, attempt=attempt+1, error_type=NULL, error_message=NULL WHERE job_id=?",
-                (now, job_id),
+            cur = conn.execute(
+                """
+                UPDATE jobs
+                SET status='running',
+                    started_at=?,
+                    heartbeat_at=?,
+                    finished_at=NULL,
+                    attempt=attempt+1,
+                    error_type=NULL,
+                    error_message=NULL,
+                    cancel_requested_at=NULL,
+                    cancel_reason=NULL,
+                    worker_id=?,
+                    process_id=NULL
+                WHERE job_id=? AND status='queued' AND attempt < max_attempts
+                """,
+                (now, now, worker_id, job_id),
             )
+            if cur.rowcount != 1:
+                return None
+            updated = conn.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
+        return self._job_from_row(updated)
+
+    def heartbeat_job(self, job_id: str) -> JobRecord:
+        now = utc_now_iso()
+        with self.connect() as conn:
+            conn.execute("UPDATE jobs SET heartbeat_at=? WHERE job_id=?", (now, job_id))
         return self.get_job(job_id)
+
+    def set_job_process(self, job_id: str, process_id: int | None) -> JobRecord:
+        with self.connect() as conn:
+            conn.execute("UPDATE jobs SET process_id=? WHERE job_id=?", (process_id, job_id))
+        return self.get_job(job_id)
+
+    def is_cancel_requested(self, job_id: str) -> bool:
+        job = self.get_job(job_id)
+        return job.status == "cancelling" or job.cancel_requested_at is not None
+
+    def request_cancel_job(self, job_id: str, *, reason: str | None = None) -> JobRecord:
+        job = self.get_job(job_id)
+        now = utc_now_iso()
+        if job.status in {"created", "queued"}:
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    UPDATE jobs
+                    SET status='cancelled',
+                        finished_at=?,
+                        cancel_requested_at=?,
+                        cancel_reason=?,
+                        process_id=NULL,
+                        error_type='CancelledError',
+                        error_message=?
+                    WHERE job_id=?
+                    """,
+                    (now, now, reason, reason or "cancelled before start", job_id),
+                )
+            return self.get_job(job_id)
+        if job.status in {"running", "collecting_outputs"}:
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    UPDATE jobs
+                    SET status='cancelling',
+                        cancel_requested_at=?,
+                        cancel_reason=?,
+                        error_type='CancelledError',
+                        error_message=?
+                    WHERE job_id=?
+                    """,
+                    (now, reason, reason or "cancel requested", job_id),
+                )
+            return self.get_job(job_id)
+        raise ValueError(f"job cannot be cancelled from status: {job.status}")
 
     def update_job_status(
         self,
@@ -500,8 +601,17 @@ class OrchestratorStore:
         with self.connect() as conn:
             if finished:
                 conn.execute(
-                    "UPDATE jobs SET status=?, finished_at=?, error_type=?, error_message=? WHERE job_id=?",
-                    (status, finished, error_type, error_message, job_id),
+                    """
+                    UPDATE jobs
+                    SET status=?,
+                        finished_at=?,
+                        heartbeat_at=?,
+                        process_id=NULL,
+                        error_type=?,
+                        error_message=?
+                    WHERE job_id=?
+                    """,
+                    (status, finished, finished, error_type, error_message, job_id),
                 )
             else:
                 conn.execute(
@@ -510,10 +620,52 @@ class OrchestratorStore:
                 )
         return self.get_job(job_id)
 
-    def retry_job(self, job_id: str) -> JobRecord:
+    def requeue_failed_attempt(
+        self,
+        job_id: str,
+        *,
+        error_type: str | None = None,
+        error_message: str | None = None,
+    ) -> JobRecord:
+        now = utc_now_iso()
         with self.connect() as conn:
             conn.execute(
-                "UPDATE jobs SET status='queued', started_at=NULL, finished_at=NULL, error_type=NULL, error_message=NULL WHERE job_id=?",
+                """
+                UPDATE jobs
+                SET status='queued',
+                    started_at=NULL,
+                    finished_at=?,
+                    heartbeat_at=NULL,
+                    process_id=NULL,
+                    error_type=?,
+                    error_message=?
+                WHERE job_id=?
+                """,
+                (now, error_type, error_message, job_id),
+            )
+        return self.get_job(job_id)
+
+    def retry_job(self, job_id: str) -> JobRecord:
+        job = self.get_job(job_id)
+        if job.status not in {"failed", "cancelled", "skipped", "needs_review", "rejected"}:
+            raise ValueError(f"job cannot be retried from status: {job.status}")
+        with self.connect() as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status='queued',
+                    attempt=0,
+                    started_at=NULL,
+                    finished_at=NULL,
+                    heartbeat_at=NULL,
+                    cancel_requested_at=NULL,
+                    cancel_reason=NULL,
+                    worker_id=NULL,
+                    process_id=NULL,
+                    error_type=NULL,
+                    error_message=NULL
+                WHERE job_id=?
+                """,
                 (job_id,),
             )
         return self.get_job(job_id)
@@ -536,6 +688,11 @@ class OrchestratorStore:
             finished_at=row["finished_at"],
             error_type=row["error_type"],
             error_message=row["error_message"],
+            heartbeat_at=row["heartbeat_at"],
+            cancel_requested_at=row["cancel_requested_at"],
+            cancel_reason=row["cancel_reason"],
+            worker_id=row["worker_id"],
+            process_id=row["process_id"],
         )
 
     def register_artifact(
@@ -550,17 +707,36 @@ class OrchestratorStore:
         compute_hash: bool = True,
     ) -> ArtifactRecord:
         now = utc_now_iso()
-        artifact_id = f"artifact_{uuid.uuid4().hex[:16]}"
         p = Path(path)
         digest = sha256_file(p) if compute_hash and p.exists() and p.is_file() else None
+        artifact_id: str
         with self.connect() as conn:
-            conn.execute(
+            existing = conn.execute(
                 """
-                INSERT INTO artifacts(artifact_id, project_id, job_id, asset_id, artifact_type, path, hash, metadata_json, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                SELECT artifact_id FROM artifacts
+                WHERE project_id=? AND job_id IS ? AND artifact_type=? AND path=?
                 """,
-                (artifact_id, project_id, job_id, asset_id, artifact_type, str(path), digest, _json(metadata), now),
-            )
+                (project_id, job_id, artifact_type, str(path)),
+            ).fetchone()
+            if existing is not None:
+                conn.execute(
+                    """
+                    UPDATE artifacts
+                    SET asset_id=?, hash=?, metadata_json=?, created_at=?
+                    WHERE artifact_id=?
+                    """,
+                    (asset_id, digest, _json(metadata), now, existing["artifact_id"]),
+                )
+                artifact_id = existing["artifact_id"]
+            else:
+                artifact_id = f"artifact_{uuid.uuid4().hex[:16]}"
+                conn.execute(
+                    """
+                    INSERT INTO artifacts(artifact_id, project_id, job_id, asset_id, artifact_type, path, hash, metadata_json, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (artifact_id, project_id, job_id, asset_id, artifact_type, str(path), digest, _json(metadata), now),
+                )
         return self.get_artifact(artifact_id)
 
     def get_artifact(self, artifact_id: str) -> ArtifactRecord:

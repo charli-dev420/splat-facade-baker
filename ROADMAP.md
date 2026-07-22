@@ -79,11 +79,11 @@
 - [ ] Test package inside a real Unity project.
 - [ ] Add optional scene importer after Bloc 8.
 
-## Phase 6 — Splat backend
+## Phase 6 — Experimental Splat Backend
 
 - [ ] Canonical splat render path.
 - [ ] RGB/alpha/depth output.
-- [ ] `bake-splat` command.
+- [ ] Promote `bake-splat` from experimental non-MVP stub to validated command.
 - [ ] Splat preview reports.
 
 ## Phase 7 — Training

@@ -18,13 +18,13 @@ class SplatRenderRequest:
 
 
 def render_splat_to_maps(request: SplatRenderRequest) -> dict:
-    """Future Block 3 backend: splat → RGB/alpha/depth maps.
+    """Experimental non-MVP backend: splat → RGB/alpha/depth maps.
 
-    This is intentionally a typed stub in v2.3. The stable pipeline already uses
-    `bake-maps`; once the gsplat backend is wired, this function should render
+    This is intentionally a typed stub in pre-MVP. The stable MVP path is
+    `bake-maps`; once a real renderer is wired, this function should render
     canonical RGB/alpha/depth maps and then call the same bake code.
     """
     raise NotImplementedError(
-        "Splat rendering is scaffolded but not implemented in v2.3. "
-        "Use `sfb bake-maps` first, or add a gsplat-backed renderer here."
+        "`sfb bake-splat` is experimental and excluded from the current MVP. "
+        "Use `sfb bake-maps`; add a validated splat renderer before enabling this path."
     )

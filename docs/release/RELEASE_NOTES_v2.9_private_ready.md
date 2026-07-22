@@ -23,4 +23,4 @@ This release packages the v2.8 scaffold into a GitHub-ready private repository.
 - Studio UI browser UX testing.
 - Blender GLB turntable validation on real assets.
 - ComfyUI live workflow execution and output collection.
-- Canonical splat rendering backend.
+- Canonical splat rendering backend; `sfb bake-splat` remains experimental and outside the MVP contract.

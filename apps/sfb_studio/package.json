@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:smoke": "vitest run --environment jsdom src/studio.smoke.test.tsx"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
@@ -17,7 +18,10 @@
     "@tanstack/react-query": "latest"
   },
   "devDependencies": {
+    "@testing-library/react": "latest",
     "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "@types/react-dom": "latest",
+    "jsdom": "latest",
+    "vitest": "latest"
   }
 }

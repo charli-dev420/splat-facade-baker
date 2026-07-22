@@ -20,19 +20,4 @@ namespace SFB.Runtime
         public string scenePath;
         public string importedByVersion = "0.8.0-pre";
     }
-
-    [Serializable]
-    public class SFBSceneCardMetadata : MonoBehaviour
-    {
-        public string sceneCardId;
-        public string assetPackage;
-        public string viewId;
-        public string viewContract;
-        public string chunkId;
-        public int occlusionLayer;
-        public float widthMeters;
-        public float heightMeters;
-        public float depthMeters;
-        public string status;
-    }
 }

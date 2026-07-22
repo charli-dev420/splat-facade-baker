@@ -16,7 +16,6 @@ def build_training_command(config: dict[str, Any], run_dir: str | Path) -> list[
         command=config.get('command') or (config.get('runner',{}) if isinstance(config.get('runner',{}),dict) else {}).get('command')
         if not isinstance(command, list) or not command: raise ValueError('shell backend requires command: [...]')
         return [str(x) for x in command]
-    if backend=='placeholder': return ['python','-c',"print('placeholder training backend: not implemented')"]
     raise ValueError(f'Unsupported training backend: {backend}')
 
 def run_training(run_dir: str | Path, *, dry_run: bool=False)->dict[str,Any]:
